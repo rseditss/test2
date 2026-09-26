@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Done — Silence Remove + Speed Match</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #222; }
+    h1 { font-size: 1.4rem; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    td { padding: 6px 4px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    td:first-child { color: #666; width: 55%; }
+    .downloads { display: flex; gap: 12px; margin: 20px 0; }
+    .downloads a { flex: 1; text-align: center; padding: 12px; background: #111; color: #fff; text-decoration: none; border-radius: 6px; }
+    .downloads a:hover { background: #333; }
+    .log { background: #f7f7f7; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+    a.back { display: inline-block; margin-top: 24px; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Done!</h1>
+
+  <div class="downloads">
+    <a href="{{ url_for('download', job_id=job_id, filename=lower_name) }}">Download lower (silence removed)</a>
+    <a href="{{ url_for('download', job_id=job_id, filename=upper_name) }}">Download upper (speed matched)</a>
+  </div>
+
+  <table>
+    <tr><td>Upper original duration</td><td>{{ "%.2f"|format(result.upper_original_duration) }}s</td></tr>
+    <tr><td>Lower original duration</td><td>{{ "%.2f"|format(result.lower_original_duration) }}s</td></tr>
+    <tr><td>Silent segments found</td><td>{{ result.silent_segments_found }}</td></tr>
+    <tr><td>Segments kept</td><td>{{ result.segments_kept }}</td></tr>
+    <tr><td>Lower duration after silence removal</td><td>{{ "%.2f"|format(result.lower_final_duration) }}s</td></tr>
+    <tr><td>Upper speed factor applied</td><td>{{ "%.3f"|format(result.speed_factor) }}x</td></tr>
+    <tr><td>Upper duration after speed match</td><td>{{ "%.2f"|format(result.upper_final_duration) }}s</td></tr>
+  </table>
+
+  <details>
+    <summary>Processing log</summary>
+    <div class="log">{% for line in log_lines %}{{ line }}
+{% endfor %}</div>
+  </details>
+
+  <a class="back" href="{{ url_for('index') }}">&larr; Process another pair</a>
+</body>
+</html>

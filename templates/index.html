@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Silence Remove + Speed Match</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #222; }
+    h1 { font-size: 1.4rem; }
+    label { display: block; margin-top: 14px; font-weight: 600; font-size: 0.9rem; }
+    input[type="file"], input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+    .hint { color: #666; font-size: 0.8rem; margin-top: 2px; }
+    .row { display: flex; gap: 16px; }
+    .row > div { flex: 1; }
+    button { margin-top: 24px; padding: 10px 20px; font-size: 1rem; background: #111; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #333; }
+    .flash { background: #fee; border: 1px solid #f99; padding: 10px; border-radius: 6px; margin-bottom: 16px; }
+    .crf-row { display: flex; align-items: center; gap: 8px; }
+    .crf-row input[type="checkbox"] { width: auto; }
+    footer { margin-top: 40px; font-size: 0.75rem; color: #999; }
+  </style>
+</head>
+<body>
+  <h1>Silence Remove + Speed Match</h1>
+  <p>Upload an "upper" and "lower" video. Silence is removed from the lower video, then the upper video is sped up to match its new duration.</p>
 
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for m in messages %}
+        <div class="flash">{{ m }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form action="{{ url_for('process') }}" method="post" enctype="multipart/form-data">
+    <label for="upper">Upper video</label>
+    <input type="file" id="upper" name="upper" accept=".mp4,.mov,.mkv,.avi,.webm,.m4v,.flv" required>
+
+    <label for="lower">Lower video</label>
+    <input type="file" id="lower" name="lower" accept=".mp4,.mov,.mkv,.avi,.webm,.m4v,.flv" required>
+
+    <div class="row">
+      <div>
+        <label for="noise_db">Silence threshold (dB)</label>
+        <input type="number" id="noise_db" name="noise_db" value="-30" step="1">
+        <div class="hint">More negative = only very quiet audio counts as silence</div>
+      </div>
+      <div>
+        <label for="min_silence">Min silence length (s)</label>
+        <input type="number" id="min_silence" name="min_silence" value="0.5" step="0.1" min="0.1">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="padding">Cut padding (s)</label>
+        <input type="number" id="padding" name="padding" value="0.08" step="0.01" min="0">
+        <div class="hint">Silence kept at each cut edge so words aren't clipped</div>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <div class="crf-row">
+          <input type="checkbox" id="use_crf" name="use_crf">
+          <span>Force CRF quality</span>
+        </div>
+        <input type="number" id="crf" name="crf" value="18" min="0" max="51">
+        <div class="hint">Lower = higher quality/larger file. Unchecked = match source bitrate.</div>
+      </div>
+    </div>
+
+    <button type="submit">Process videos</button>
+  </form>
+
+  <footer>Processing happens on the server and can take a while for longer videos. Files are deleted automatically after 1 hour.</footer>
+</body>
+</html>
